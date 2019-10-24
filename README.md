@@ -3,3 +3,5 @@
 Langkah penggunaan
 1. clone ke server
 2. jalankan rule.sh untuk mengubah owner folder data menjadi www-data agar bisa rwx oleh apache
+
+atau baca penjelasan tutorialnya disini https://net.detik.org/docs

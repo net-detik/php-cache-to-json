@@ -1,8 +1,9 @@
 <?php
-namespace cache;
-class jsonCache{
+namespace myCache;
+class phpCache{
   static $cacheSaveTime=60; //default 60 detik
   static $domain      ='https://net.detik.org/pub';
+  static $rootData    ='/var/www/html/api/data/';
   
   //@--
 	//fungsi untuk mencari selisih waktu
@@ -26,7 +27,7 @@ class jsonCache{
 			//return to create cache
 			$callback['pesan']		='gagal';
 			$callback['text_msg']	='No cache please Create cache';
-			return;
+			return $callback;
 		}
     
     //cek selisih jam sekarang dengan waktu cache terakhir diperbaharui
@@ -38,7 +39,7 @@ class jsonCache{
 			$callback['text_msg']	='Load cache';
 			$callback['hasCached']	=$selisihDetik;
 			$callback['cachedId']	=$params['fileName'];
-			$callback['data']		=file_get_contents($fileName,FILE_USE_INCLUDE_PATH);
+			$callback['data']		=json_decode(file_get_contents($params['fileName'],FILE_USE_INCLUDE_PATH),true);
 		}else{
 			//return to create cache
 			$callback['pesan']		='gagal';
@@ -63,7 +64,7 @@ class jsonCache{
      $fieldsString = http_build_query($params);
      $ch = curl_init();
       if($method == 'POST'){
-				 curl_setopt($ch,CURLOPT_POST, count($params));
+		 curl_setopt($ch,CURLOPT_POST, count($params));
          curl_setopt($ch,CURLOPT_POSTFIELDS, $fieldsString);
       }
       else{
@@ -84,8 +85,26 @@ class jsonCache{
             return $return;
     }
   
-  public function result($params){
-    $request=self::makeRequest($params);
-    return $request;
+  public function result($params){ 
+    $query      =http_build_query($params);
+    $fileName   =md5($query).'.json';
+    $cekCache   =self::getCache(array(
+        'fileName'=>self::$rootData.''.$fileName,
+    ));
+    if($cekCache['pesan']=='gagal'){
+        $request=self::makeRequest($params);
+        self::createCache(array(
+            'folderFull'=>self::$rootData,
+            'fileName'  =>$fileName,
+            'fileContent'=>json_encode($request),
+        ));
+        $callback['pesan']  ='sukses';
+        $callback['text_msg']  ='OK';
+        $callback['data']   =$request;
+    }else{
+        $callback=$cekCache;
+    }
+
+    return $callback;
   }
 }

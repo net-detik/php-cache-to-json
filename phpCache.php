@@ -1,0 +1,5 @@
+namespace cache;
+class jsoCache{
+
+
+}
